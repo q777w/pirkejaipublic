@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>pirkejai</title>
+	
+	<meta charset="utf-8">
+	
+	<style>
+	
+		table{
+    		
+				border-collapse: collapse;
+			
+			}
+			
+			th, td{
+			
+				border: 1px solid red;
+				padding: 8px;
+			
+			}
+			
+	</style>
+	
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="/resources/demos/style.css">
+	<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+	<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+  	
+  	<script>
+  		
+  		$(document).ready(function(){
+			var dialog, form;
+			
+			function addVartotojas() {
+			
+				form.submit();
+			}
+			
+			dialog = $( "#vartotojo_pridejimas" ).dialog({
+			      autoOpen: false,
+			      height: 400,
+			      width: 350,
+			      modal: true,
+			      buttons: {
+				"Vartotojo pridejimas": addVartotojas,
+				Cancel: function() {
+				dialog.dialog( "close" );
+				}
+			     }
+			});
+			
+			form = dialog.find( "form" );
+			
+			$( "#pridejimo_mygtukas" ).button().on( "click", function() {
+			      dialog.dialog( "open" );
+			});
+			
+			  $( ".edit" ).each ( function() {
+		    
+		    	$( this ).button().click ( function() {
+		    	
+		    		id_pirkejo = $( this ).data ( 'id' );
+		    		
+					$.ajax({
+						 method: 'POST'
+				 		 , url: '/pirkejas'
+				 		 , data: {
+				 		 	id: id_pirkejas
+				 		 }
+					}).done( function( data ) {
+						
+						if ( data != null ) {
+						
+							$( '#vardas' ).val ( data.vardas );
+							$( '#pavarde' ).val ( data.pavarde );
+							$( '#miestas' ).val ( data.miestas );									
+							$( '#id').val ( data.id );
+		      				dialog.dialog( "open" );							
+						}
+
+				  	});			    		
+		    		
+		    	});	
+		    			    
+		    });
+		    
+		    	  del_dialog = $( "#dialog-confirm" ).dialog({
+			
+			      autoOpen: false,
+			      resizable: false,
+			      height: "auto",
+			      width: 400,
+			      modal: true,
+			      buttons: {
+				"Pašalinti": function() {
+					$( this ).dialog( "close" );
+					$( '#salinimo_forma' ).submit();
+			          },
+				Cancel: function() {
+					$( this ).dialog( "close" );
+				}
+			      }
+			});
+			
+			$( '.delete' ).button().on ( 'click', function() {
+				id_iraso = $( this ).data( 'id' );
+				console.log(id_iraso);
+				$( '#id_iraso_del' ).val ( id_iraso );
+				del_dialog.dialog( "open" );
+			});
+		});
+  		
+  	</script>
+</head>
+
+<body>
+
+	<table>
+		<tr th:each="pirkejas : ${pirkejai}">
+			<td th:text="${pirkejas.getVardas()}"></td>
+			<td th:text="${pirkejas.getPavarde()}"></td>
+			<td th:text="${pirkejas.getMiestas()}"></td>			
+			<td><button class="edit" th:attr="data-id=${pirkejas.getId()}" value="redaguoti">Redaguoti</button></td>
+			<td><button class="delete" th:attr="data-id=${pirkejas.getId()}">Šalinti</button></td>		
+		</tr>
+	</table>
+	
+	<div id="vartotojo_pridejimas">
+		<form method="post" action="">
+			<label for="vardas"><br> Vardas: <br></label>
+			<input type="text" name="vardas" id="vardas" value="">
+			<label for="pavarde"><br> Pavardė: <br></label>
+			<input type="text" name="pavarde" id="pavarde" value="">
+			<label for="miestas"><br> Miestas: <br></label>
+			<select name="miestas" id="miestas">
+			<option th:each="miestas : ${lst_miestai}" th:value="${miestas.getId()}" th:text="${miestas.getMiestas()}">
+			</select> 
+			<input type="hidden" id="id" name="id" value="0">
+			<input type="hidden" id="prideti" name="prideti" value="prideti">
+		</form>
+	</div>
+	
+	<div id="dialog-confirm" title="Pasirinktų duomenų šalinimas">
+		<p>Ar tikrai norite ištrinti pasirinktus duomenis?</p>
+		<form id="salinimo_forma" method="post" action="/salinti-vartotoja">
+				<input type="hidden" name="salinti" id="salinti" value="salinti">
+				<input type="hidden" name="id_iraso_del" id="id_iraso_del" value="0">	
+		</form>
+	</div>
+		</form>
+	</div>
+	
+	<div id="dialog-confirm" title="Pasirinktų duomenų redagavimas">
+		<form id="redagavimo_forma" method="post" action="/redaguoti-vartotoja">
+				<input type="hidden" name="redaguoti" id="redaguoti" value="redaguoti">
+				<input type="hidden" name="id_iraso" id="id_iraso" value="0">	
+		</form>
+	</div>
+		
+	<button id="pridejimo_mygtukas">Vartotojo pridejimas</button>
+	
+</body>
+
+
+
+
+
+
